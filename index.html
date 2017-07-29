@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" type="image/png" href="img/bart_logo.png">
+<title>BART train search</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="js/bartjs.js"></script>
+<style>
+body,h1,h2,h3,h4,h5,h6,p {font-family: "Merriweather", Arial, Helvetica, sans-serif}
+#sourcestn, #deststn{
+    font-size: 18;
+    border: 1px solid lightblue;
+    color: black;
+    padding: 12px;
+    width: 300px;
+} 
+#results{
+  display: none;
+}
+#extras{
+  display: none;
+}
+</style>
+<script type="text/javascript">
+  
+</script>
+</head>
+
+<body class="w3-light-grey" onload="init()" oncontextmenu="return false;">
+<!-- Header -->
+<header>
+<div class="w3-bar w3-white w3-border-bottom">
+  <h3 class="w3-left w3-row-padding">Bay Area Rapid Transit</h3>
+  <p class="w3-right w3-row-padding"><a href="#search" class="sliding-link"><i class="fa fa-search"></i></a></p>
+</div>
+</header>
+
+<!-- Modal -->
+<div id="id01" class="w3-modal">
+    <div class="w3-modal-content w3-card-8 w3-animate-top">
+      <header class="w3-container w3-theme-l1"> 
+        <span onclick="document.getElementById('id01').style.display='none'" class="w3-closebtn"><i class="fa fa-window-minimize" style="float:right;padding-left:2%;padding-right:10%font-size:small;"></i>&nbsp;</span>
+        <span onclick="location.reload(true);" class="w3-closebtn"><i class="fa fa-close" style="float:right;padding-left:2%;padding-right:5%"></i>&nbsp;</span>
+        <h4>Route Map</h4>
+      </header>
+      <div class="w3-padding">
+        <img src="img/route.png">
+      </div>
+      <footer class="w3-container w3-theme-l1">
+        <p>Developed by <a href="http://varuns.me" target="_blank">Varun</a></p>
+      </footer>
+    </div>
+</div>
+<div id="id02" class="w3-modal">
+    <div class="w3-modal-content w3-card-8 w3-animate-top">
+      <header class="w3-container w3-theme-l1"> 
+        <span onclick="document.getElementById('id02').style.display='none'" class="w3-closebtn"><i class="fa fa-window-minimize" style="float:right;padding-left:2%;padding-right:10%font-size:small;"></i>&nbsp;</span>
+        <span onclick="location.reload(true);" class="w3-closebtn"><i class="fa fa-close" style="float:right;padding-left:2%;padding-right:5%"></i>&nbsp;</span>
+        <h4>Time Out</h4>
+      </header>
+      <div class="w3-padding">
+        <p>Aww.. Your train just left!</p>
+        <p>Click on <i class="fa fa-window-minimize"></i> (minimize button) to continue. Click <i class="fa fa-close"></i> (close button) on the top right corner of the pop-up window to refresh now.</p>
+      </div>
+      <footer class="w3-container w3-theme-l1">
+        <p>Developed by <a href="http://varuns.me" target="_blank">Varun</a></p>
+      </footer>
+    </div>
+</div>
+
+<div class="w3-container" style="height:700px;">
+  <div class="w3-padding-32" style="background:url(img/bart1.jpg);background-attachment:fixed;justify-content:center;align-items:center;min-height:700px;">
+    <div style="padding:15% 20% 15% 20%">
+      <div class="w3-container w3-white w3-padding-16 w3-center" style="width:60%;position:absolute;">
+        <script type="text/javascript">
+              usbt=localStorage.getItem("usersessionbarttime");
+              usbn=localStorage.getItem("numofhits");
+              if(usbt==null||usbn==null){
+                localStorage.setItem("usersessionbarttime",Date());
+                localStorage.setItem("numofhits",1);
+                document.write("<h1 class='w3-text-black'>Hello!</h1>"); 
+              }else{
+                localStorage.setItem("usersessionbarttime",Date());
+                localStorage.setItem("numofhits",++usbn);
+                  document.write("<h2 class='w3-text-black'>Hello.<br>Welcome back!</h2>");
+                  document.write("<h4 class='w3-text-grey'>Your previous visit was at <br><b>"+usbt+"</b><br>and you have visited the portal <b>"+usbn+"</b> times.</h4>");
+              }
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+<!--
+Why is it possible for your website to load and display data from the BART API?
+
+<img> receives any parameter for src attribute – which violates same origin Policy, and complies to cross origin policy. In this assignment, we use JSONP to inject <script> to request to any domain 
+
+References:
+...........
+[1] http://stackoverflow.com/questions/14159154/how-does-a-rest-api-work-with-javascript-when-there-is-a-same-domain-origin-poli 
+[2] https://en.wikipedia.org/wiki/JSONP
+-->
+<div id="search" class="w3-container w3-padding">
+  <div class="w3-container" style="height:240px;">
+    <h1 class="w3-center">Search trains</h1>
+    <form method="POST">
+      <div class="w3-row">
+        <div class="w3-third w3-row-padding">
+          <label>Source</label>
+          <div id="sourcedd"></div>
+        </div>
+        <div class="w3-third w3-row-padding">
+          <label>Destination</label>
+          <div id="destinationdd"></div>
+        </div>
+        <div class="w3-third w3-row-padding">
+          <label>&nbsp;</label><br>
+          <input class="w3-btn w3-dark-grey w3-center" id="searchbtn" type="button" name="submit" value="Submit" onclick="validate()">
+          <input class="w3-btn w3-dark-grey w3-center" type="reset" name="reset" value="&nbsp;Reset&nbsp;">
+          <input class="w3-btn w3-dark-grey w3-center" type="button" name="route" value="&nbsp;Route map&nbsp;" onclick="document.getElementById('id01').style.display='block'">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="results" class="w3-row">
+    <div class="w3-padding-32" style="background:url(img/bart2.jpg);background-attachment:fixed;height:60%;">
+      <div class="w3-row-padding" style="padding: 5% 10% 5% 10%">
+        <div class="w3-half w3-row-padding" style="padding-right:3%;padding-top:1%">
+          <div class="w3-card-4 w3-padding-32 w3-white" style="min-height:50px">
+          <div class="w3-center"><h3><i class="fa fa-train"></i> Source Terminal</h3></div>
+          <div id="SourceInfo" style="padding-left:10%;padding-right:10%" class="w3-left-align"></div>
+          </div>
+        </div>
+
+        <div class="w3-half w3-row-padding" style="padding-left:3%;padding-top:1%">
+          <div class="w3-card-4 w3-padding-32 w3-white" style="min-height:50px">
+          <div class="w3-center"><h3><i class="fa fa-train"></i> Destination terminal</h3></div>
+             <div id="DestInfo" style="padding-left:10%;padding-right:10%" class="w3-left-align"></div>
+          </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div id="extras">
+<div class="w3-container w3-padding">
+  <div class="w3-container" style="min-height:50px;">
+    <h1 class="w3-center">More About your journey</h1>
+  </div>
+</div>
+<div class="w3-row">
+  <div class="w3-padding-32" style="background:url(img/bart3.jpg);background-attachment:fixed;height:50%;">
+    <div class="w3-row-padding" style="padding: 5% 10% 5% 10%">
+      <div class="w3-half w3-row-padding" style="padding-right:3%;padding-top:1%">
+        <div class="w3-card-4 w3-padding-32 w3-white" style="min-height:450px;">
+          <div class="w3-center"><h3><i class="fa fa-list-alt"></i> More Info</h3></div>
+          <div id="MoreInfo" style="padding-left:10%;padding-right:10%" class="w3-left-align"></div>
+          <div id="CountDown" style="padding-left:10%;padding-right:10%" class="w3-left-align"></div>
+          <div id="MapButton" style="padding:10% 10% 10% 10%;float:right;" class="w3-padding-16"></div>
+        </div>
+      </div>
+      <div class="w3-half w3-row-padding" style="padding-left:3%;padding-top:1%">
+        <div id="googleMap" class="w3-card-4 w3-padding-32 w3-white" style="min-height:450px;">
+          <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXIvVgxOjQqaip8tUAaL_cSEc7eEIob28&callback=initMap">
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!--Footer-->
+<footer>
+  <p style="padding-left:3%"><i class="fa fa-pencil"></i>&nbsp;&nbsp;Developed by <a href="http://varuns.me" target="_blank">Varun</a></p>
+</footer>
+</body>
+</html>

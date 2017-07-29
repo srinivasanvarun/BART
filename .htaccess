@@ -1,0 +1,6 @@
+#Turning on the rewrite engine to handle rest api calls
+Options +FollowSymlinks
+RewriteEngine on
+  
+#request routing
+RewriteRule ^/stations(/.*)? stationsrestapi.php [QSA,L]
